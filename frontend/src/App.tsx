@@ -5,7 +5,7 @@ import FeaturesForm from "./components/FeaturesForm";
 
 function App() {
   return (
-    <div className="container mx-auto">
+    <div className="container mx-auto px-6 sm:px-0">
       <Navbar />
       <h2 className="text-xl font-semibold">Klasifikasi Penyakit Stroke</h2>
       <Card
