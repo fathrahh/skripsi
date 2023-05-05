@@ -1,5 +1,6 @@
-import { Button, Card } from "@material-tailwind/react";
+import { Card } from "@material-tailwind/react";
 import { TiWarning } from "react-icons/ti";
+
 import Navbar from "./components/Navbar";
 import FeaturesForm from "./components/FeaturesForm";
 
