@@ -2,6 +2,7 @@ import { Button, Input, Option, Select } from "@material-tailwind/react";
 import { FormEvent, useState } from "react";
 
 import { features } from "./../const";
+import requestPrediction from "../api/predict";
 
 export type ModelFeatures = {
   age: number;
@@ -25,7 +26,9 @@ export default function FeaturesForm() {
   const [heartDisease, setHeartDisease] = useState("");
   const [hypertension, setHypertension] = useState("");
 
-  const onSubmitForm = (ev: FormEvent<HTMLFormElement>): void => {
+  const onSubmitForm = async (
+    ev: FormEvent<HTMLFormElement>
+  ): Promise<void> => {
     ev.preventDefault();
     const formData = new FormData(ev.currentTarget);
 
@@ -40,13 +43,17 @@ export default function FeaturesForm() {
       ...Object.fromEntries(formData),
     };
 
-    const request = Object.fromEntries(
+    const modelFeatures = Object.fromEntries(
       Object.entries(features).map(([key, value]) => {
         return [key, Number(value)];
       })
     ) as ModelFeatures;
 
-    console.log(request);
+    console.log(modelFeatures);
+
+    const response = await requestPrediction(modelFeatures);
+
+    console.log(response);
   };
 
   return (

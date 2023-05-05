@@ -89,7 +89,6 @@ oversample = SMOTE()
 X_oversample, y_oversample = oversample.fit_resample(X_train, y_train.ravel())
 counter = Counter(y_oversample)
 
-print(counter)
 
 model = KNeighborsClassifier(
     n_neighbors=13, weights='distance', metric='euclidean')
