@@ -13,12 +13,12 @@ export type ModelFeatures = {
   workType: number;
   residentType: number;
   avgGlucoseLevel: number;
-  BMI: number;
+  bmi: number;
   smokingStatus: number;
 };
 
 export default function FeaturesForm() {
-  const [residence, setResidence] = useState("");
+  const [residentType, setResidentType] = useState("");
   const [smokingStatus, setSmokingStatus] = useState("");
   const [everMarried, setEverMarried] = useState("");
   const [workType, setWorkType] = useState("");
@@ -33,7 +33,7 @@ export default function FeaturesForm() {
     const formData = new FormData(ev.currentTarget);
 
     const features: Record<string, string> = {
-      residence,
+      residentType,
       smokingStatus,
       everMarried,
       workType,
@@ -70,7 +70,7 @@ export default function FeaturesForm() {
         />
         <Input
           required
-          name="BMI"
+          name="bmi"
           type="number"
           className="col-span-1"
           size="md"
@@ -147,8 +147,8 @@ export default function FeaturesForm() {
         {/* Lokasi Tinggal */}
         <Select
           color="green"
-          value={residence}
-          onChange={(value) => setResidence(value ?? "")}
+          value={residentType}
+          onChange={(value) => setResidentType(value ?? "")}
           name="lokasiTinggal"
           label="Resident Type"
         >

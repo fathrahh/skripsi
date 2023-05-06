@@ -1,13 +1,14 @@
 from pydantic import BaseModel
 
+
 class Features(BaseModel):
     age: int
-    BMI: float
     avgGlucoseLevel: float
-    gender: int
-    hypertension: int
-    heartDisease: int
+    bmi: float
     everMarried: int
-    workType: int
+    gender: int
+    heartDisease: int
+    hypertension: int
     residentType: int
+    workType: int
     smokingStatus: int

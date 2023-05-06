@@ -6,7 +6,9 @@ export default async function requestPrediction(
   const response = await fetch("http://127.0.0.1:8000/predict", {
     method: "POST",
     body: JSON.stringify(features),
-    headers: {},
+    headers: {
+      "content-type": "application/json",
+    },
   });
 
   const data = (await response.json()) as number;

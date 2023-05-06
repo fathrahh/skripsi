@@ -1,7 +1,6 @@
-from fastapi import FastAPI
-from starlette.responses import Response
+from fastapi import FastAPI, Request
 
-from .request.models import Features
+from app.request.models import Features
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -13,19 +12,15 @@ origins = [
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
-@app.get("/")
-def root():
-    return {"message": "Fast API in Python"}
-
-
-@app.post("/predict", status_code=200)
-def predict(payload: Features):
+@app.post("/predict")
+def predict(payload: Features) -> int:
     payload = payload.dict()
+
+    print(payload)
 
     return payload['age']
