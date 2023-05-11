@@ -1,14 +1,13 @@
+import numpy as np
 import pandas as pd
-import pickle
 
-from numpy import mean
+from sklearn.model_selection import KFold, train_test_split, cross_val_score
+from sklearn.neighbors import KNeighborsClassifier
+from pyswarm import pso
+
 from pandas.core.frame import DataFrame
 
-from collections import Counter
 from imblearn.over_sampling import SMOTE
-from sklearn import metrics
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import train_test_split, StratifiedKFold, cross_validate
 
 
 def printColumnTypes(non_numeric_df: DataFrame, numeric_df: DataFrame) -> None:
@@ -86,23 +85,38 @@ X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.3, random_state=1)
 
 oversample = SMOTE()
-
-# Resampling
 X_oversample, y_oversample = oversample.fit_resample(X_train, y_train.ravel())
-counter = Counter(y_oversample)
 
 
-model = KNeighborsClassifier(
-    n_neighbors=1, weights='distance', metric='euclidean')
+def knn_fitness_function(x, X, y):
+    k = int(x[0])
+    weight = 'uniform' if x[1] < 0.5 else 'distance'
+    kf = KFold(n_splits=10, shuffle=True, random_state=42)
+    accuracies = []
+    for train_idx, test_idx in kf.split(X):
+        # Train KNN classifier with given k and weight
+        clf = KNeighborsClassifier(n_neighbors=k, weights=weight)
+        clf.fit(X[train_idx], y[train_idx])
+        # Evaluate accuracy on test set
+        accuracy = clf.score(X[test_idx], y[test_idx])
+        accuracies.append(accuracy)
+    # Return negative mean accuracy as minimization objective
+    return -np.mean(accuracies)
 
-cv = StratifiedKFold(n_splits=10, shuffle=True, random_state=11)
-scores = cross_validate(model, X_oversample, y_oversample,
-                        scoring=['accuracy', 'precision', 'recall', 'roc_auc'], cv=cv)
 
-model.fit(X_oversample, y_oversample)
+# Define bounds for PSO
+lb = [1, 0]
+ub = [20, 1]
 
-with open('./backend/model.pkl', 'wb') as f:
-    pickle.dump(model, f)
+# Run PSO optimization
+xopt, fopt = pso(knn_fitness_function, lb, ub,
+                 args=(X_oversample, y_oversample))
 
-for key in scores:
-    print(f"{key}: {mean(scores[key])}")
+# Print optimal hyperparameters and accuracy
+k = int(xopt[0])
+weight = xopt[1:]
+clf = KNeighborsClassifier(n_neighbors=k, weights=weight)
+accuracy = np.mean(cross_val_score(clf, X_test, y_test, cv=10))
+print("Optimal k: ", k)
+print("Optimal weight: ", weight)
+print("10-CV Accuracy: ", accuracy)
