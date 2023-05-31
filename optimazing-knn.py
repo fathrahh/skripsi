@@ -4,11 +4,12 @@ import pickle
 from numpy import mean
 from pandas.core.frame import DataFrame
 
+from joblib import dump
 from collections import Counter
 from imblearn.over_sampling import SMOTE
 from sklearn import metrics
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import train_test_split, StratifiedKFold, cross_validate
+from sklearn.model_selection import train_test_split, KFold, cross_validate
 
 
 def printColumnTypes(non_numeric_df: DataFrame, numeric_df: DataFrame) -> None:
@@ -77,7 +78,6 @@ mean_bmi_replacement_value = df.loc[:, 'bmi'].dropna().mean()
 
 df['bmi'] = df.loc[:, 'bmi'].fillna(mean_bmi_replacement_value)
 
-print(df['stroke'].value_counts() / len(df))
 
 X = df.iloc[:, :-1].values
 y = df.iloc[:, 10].values
@@ -93,16 +93,15 @@ counter = Counter(y_oversample)
 
 
 model = KNeighborsClassifier(
-    n_neighbors=1, weights='distance', metric='euclidean')
+    n_neighbors=3, weights='distance', metric='euclidean')
 
-cv = StratifiedKFold(n_splits=10, shuffle=True, random_state=11)
+cv = KFold(n_splits=10, shuffle=True, random_state=11)
 scores = cross_validate(model, X_oversample, y_oversample,
-                        scoring=['accuracy', 'precision', 'recall', 'roc_auc'], cv=cv)
+                        scoring=['accuracy', 'precision', 'recall', 'f1', 'roc_auc'], cv=cv)
 
 model.fit(X_oversample, y_oversample)
 
-with open('./backend/model.pkl', 'wb') as f:
-    pickle.dump(model, f)
+dump(model, 'model.pkl')
 
 for key in scores:
     print(f"{key}: {mean(scores[key])}")

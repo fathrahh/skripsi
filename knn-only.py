@@ -4,7 +4,7 @@ import pickle
 
 from numpy import mean
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import train_test_split, KFold
+from sklearn.model_selection import train_test_split, KFold, cross_validate
 
 # main
 filename = 'healthcare-dataset-stroke-data.csv'
@@ -14,13 +14,16 @@ cols = ['gender', 'age', 'hypertension', 'heart_disease', 'ever_married', 'work_
 df = pd.read_csv(filename, usecols=cols)
 
 # Data cleansing
+modus_smoking_status = df['smoking_status'].max()
+df['smoking_status'] = df['smoking_status'].apply(
+    lambda x: modus_smoking_status if x == 'Unknown' else x)
+
 num_gender = {'Female': 0, 'Male': 1}
 num_ever_married = {'No': 0, 'Yes': 1}
 num_smoking_status = {
     'formerly smoked': 0,
     'never smoked': 1,
     'smokes': 2,
-    'Unknown': 3,
 }
 num_work_type = {
     'children': 0,
@@ -34,8 +37,10 @@ num_residence_type = {
     'Rural': 1
 }
 
-df['gender'] = df[['gender' != 'other']]
+# Remove Other Value
+df = df[df['gender'] != 'Other']
 
+# Label Encoding
 df['gender'] = df['gender'].replace(num_gender)
 df['ever_married'] = df['ever_married'].replace(num_ever_married)
 df['Residence_type'] = df['Residence_type'].replace(num_residence_type)
@@ -57,27 +62,31 @@ X_train, X_test, y_train, y_test = train_test_split(
 n_folds = 10
 
 # Initialize the KFold object
-kf = KFold(n_splits=n_folds, shuffle=True, random_state=42)
+cv = KFold(n_splits=n_folds, shuffle=True, random_state=1)
 
 model = KNeighborsClassifier(n_neighbors=3, weights="distance")
+scores = cross_validate(model, X, y, scoring=[
+                        'accuracy', 'precision', 'recall', 'f1', 'roc_auc'], cv=cv, n_jobs=-1)
 
-accuracy_scores = []
-predicted_labels = []
+for key in scores:
+    print(key + "  " + str(np.mean(scores[key])))
+# accuracy_scores = []
+# predicted_labels = []
 
-for train_index, test_index in kf.split(X):
-    # Split the data into training and testing sets for this fold
-    print(train_index)
-    X_train, X_test = X[train_index], X[test_index]
-    y_train, y_test = y[train_index], y[test_index]
+# for train_index, test_index in kf.split(X):
+#     # Split the data into training and testing sets for this fold
+#     print(train_index)
+#     X_train, X_test = X[train_index], X[test_index]
+#     y_train, y_test = y[train_index], y[test_index]
 
-    # Fit the model on the training data
-    model.fit(X_train, y_train)
+#     # Fit the model on the training data
+#     model.fit(X_train, y_train)
 
-    # Evaluate the model on the testing data and store the accuracy score
-    accuracy_scores.append(model.score(X_test, y_test))
+#     # Evaluate the model on the testing data and store the accuracy score
+#     accuracy_scores.append(model.score(X_test, y_test))
 
 # Calculate the mean and standard deviation of the accuracy scores
-mean_accuracy = np.mean(accuracy_scores)
-std_accuracy = np.std(accuracy_scores)
+# mean_accuracy = np.mean(accuracy_scores)
+# std_accuracy = np.std(accuracy_scores)
 
-print(f'Mean accuracy: {mean_accuracy:.f} +/- {std_accuracy:.3f}')
+# print(f'Mean accuracy: {mean_accuracy:.f} +/- {std_accuracy:.3f}')

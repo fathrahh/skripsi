@@ -1,16 +1,16 @@
-const gender = ["Female", "Male", "Other"];
+const gender = ["Female", "Male"];
 const everMarried = ["No", "Yes"];
-const smokingStatus = ["Formerly Smoked", "Never Smoked", "Smokes", "Unknown"];
+const smokingStatus = ["Formerly Smoked", "Never Smoked", "Smokes"];
 
-const hypertension = ["No", "Yes"];
-const heartDisease = ["No", "Yes"];
+const hypertension = ["Tidak", "Iya"];
+const heartDisease = ["Tidak", "Iya"];
 
 const workType = [
-  "children",
-  "Govt_job",
-  "Never_worked",
-  "Private",
-  "Self-employed",
+  "Anak-anak",
+  "Pekerja Pemerintahan",
+  "Tidak Bekerja",
+  "Privat",
+  "Wiraswasta",
 ];
 
 const residenceType = ["Urban", "Rural"];

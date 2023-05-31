@@ -1,2 +1,8 @@
 ./*/__pycache__
 ./*/**/node_modules
+
+.pkl
+.joblib
+
+.env
+.env.local
