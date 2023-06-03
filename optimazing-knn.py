@@ -1,53 +1,37 @@
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
 import pandas as pd
-import pickle
+import numpy as np
 
 from numpy import mean
-from pandas.core.frame import DataFrame
 
-from joblib import dump
-from collections import Counter
+from imblearn.pipeline import Pipeline
 from imblearn.over_sampling import SMOTE
-from sklearn import metrics
+from imblearn.under_sampling import TomekLinks
+from sklearn.metrics import f1_score
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import train_test_split, KFold, cross_validate
+from sklearn.model_selection import KFold
 
-
-def printColumnTypes(non_numeric_df: DataFrame, numeric_df: DataFrame) -> None:
-    '''separates non-numeric and numeric columns'''
-
-    print("Non-Numeric columns:")
-    for col in non_numeric_df:
-        print(f"{col}")
-
-    print("Numeric columns:")
-    for col in numeric_df:
-        print(f"{col}")
-
-
-def printUniqueValue(cols: list):
-    for col in cols:
-        print(f"{col}: {df[col].unique()}")
-
-
-# main
 filename = 'healthcare-dataset-stroke-data.csv'
 cols = ['gender', 'age', 'hypertension', 'heart_disease', 'ever_married', 'work_type',
         'Residence_type', 'avg_glucose_level', 'bmi', 'smoking_status', 'stroke']
 
 df = pd.read_csv(filename, usecols=cols)
 
-# Check datatype each column of dataframe
-cat_df = df.select_dtypes(include=['object'])
-num_df = df.select_dtypes(exclude=['object'])
-
-printColumnTypes(cat_df, num_df)
-
 non_numeric_col = ['gender', 'ever_married',
                    'work_type', 'Residence_type', 'smoking_status']
 
-printUniqueValue(non_numeric_col)
 
 # Data cleansing
+modus_smoking_status = df['smoking_status'].max()
+df['smoking_status'] = df['smoking_status'].apply(
+    lambda x: modus_smoking_status if x == 'Unknown' else x)
+
+mean_bmi_replacement_value = df.loc[:, 'bmi'].dropna().mean()
+df['bmi'] = df.loc[:, 'bmi'].fillna(mean_bmi_replacement_value)
+
+df = df[df['gender'] != 'Other']
+
 num_gender = {'Female': 0, 'Male': 1, 'Other': 2}
 num_ever_married = {'No': 0, 'Yes': 1}
 num_smoking_status = {
@@ -74,34 +58,42 @@ df['Residence_type'] = df['Residence_type'].replace(num_residence_type)
 df['smoking_status'] = df['smoking_status'].replace(num_smoking_status)
 df['work_type'] = df['work_type'].replace(num_work_type)
 
-mean_bmi_replacement_value = df.loc[:, 'bmi'].dropna().mean()
 
-df['bmi'] = df.loc[:, 'bmi'].fillna(mean_bmi_replacement_value)
+kf = KFold(n_splits=10, random_state=1, shuffle=True)
+scores = {
+    'fmeasure': []
+}
 
+column = ["age", "avg_glucose_level", "bmi"]
 
-X = df.iloc[:, :-1].values
-y = df.iloc[:, 10].values
+scaler = MinMaxScaler()
 
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.3, random_state=1)
+for col in cols:
+    df[col] = scaler.fit_transform(df[[col]])
 
-oversample = SMOTE()
-
-# Resampling
-X_oversample, y_oversample = oversample.fit_resample(X_train, y_train.ravel())
-counter = Counter(y_oversample)
-
+X = df.iloc[:, df.columns != 'stroke'].values
+y = np.array(df['stroke'])
 
 model = KNeighborsClassifier(
     n_neighbors=3, weights='distance', metric='euclidean')
+oversampler = SMOTE(random_state=42)
+tl = TomekLinks()
 
-cv = KFold(n_splits=10, shuffle=True, random_state=11)
-scores = cross_validate(model, X_oversample, y_oversample,
-                        scoring=['accuracy', 'precision', 'recall', 'f1', 'roc_auc'], cv=cv)
+# Definisikan pipeline dengan langkah-langkah pemrosesan data dan model
+pipeline = Pipeline(steps=[
+    ('oversampling', oversampler),
+    ('tomek', tl),
+    ('classification', model)
+])
 
-model.fit(X_oversample, y_oversample)
+for train_index, test_index in kf.split(X):
+    X_train, X_test = X[train_index], X[test_index]
+    y_train, y_test = y[train_index], y[test_index]
 
-dump(model, 'model.pkl')
+    pipeline.fit(X_train, y_train)
+    y_pred = pipeline.predict(X_test)
+
+    scores['fmeasure'].append(f1_score(y_test, y_pred))
 
 for key in scores:
     print(f"{key}: {mean(scores[key])}")
