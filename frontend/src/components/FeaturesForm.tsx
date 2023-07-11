@@ -17,13 +17,15 @@ export type ModelFeatures = {
   smokingStatus: number;
 };
 
+// age, bmi, work_type, hypertension, dan evered_married
+
 export default function FeaturesForm() {
-  const [residentType, setResidentType] = useState("");
-  const [smokingStatus, setSmokingStatus] = useState("");
+  // const [residentType, setResidentType] = useState("");
+  // const [smokingStatus, setSmokingStatus] = useState("");
   const [everMarried, setEverMarried] = useState("");
   const [workType, setWorkType] = useState("");
-  const [gender, setGender] = useState("");
-  const [heartDisease, setHeartDisease] = useState("");
+  // const [gender, setGender] = useState("");
+  // const [heartDisease, setHeartDisease] = useState("");
   const [hypertension, setHypertension] = useState("");
 
   const onSubmitForm = async (
@@ -33,12 +35,12 @@ export default function FeaturesForm() {
     const formData = new FormData(ev.currentTarget);
 
     const features: Record<string, string> = {
-      residentType,
-      smokingStatus,
+      // residentType,
+      // smokingStatus,
       everMarried,
       workType,
-      gender,
-      heartDisease,
+      // gender,
+      // heartDisease,
       hypertension,
       ...Object.fromEntries(formData),
     };
@@ -87,7 +89,7 @@ export default function FeaturesForm() {
           step="0.01"
         />
         {/* Gender */}
-        <Select
+        {/* <Select
           color="green"
           value={gender}
           onChange={(value) => setGender(value ?? "")}
@@ -99,9 +101,9 @@ export default function FeaturesForm() {
               {gender}
             </Option>
           ))}
-        </Select>
+        </Select> */}
         {/* Heart Disease */}
-        <Select
+        {/* <Select
           color="green"
           value={heartDisease}
           onChange={(value) => setHeartDisease(value ?? "")}
@@ -113,7 +115,7 @@ export default function FeaturesForm() {
               {heartDisease}
             </Option>
           ))}
-        </Select>
+        </Select> */}
         {/* Hypertension */}
         <Select
           color="green"
@@ -129,7 +131,7 @@ export default function FeaturesForm() {
           ))}
         </Select>
         {/* Smoking Status */}
-        <Select
+        {/* <Select
           color="green"
           value={smokingStatus}
           onChange={(value) => setSmokingStatus(value ?? "")}
@@ -141,9 +143,9 @@ export default function FeaturesForm() {
               {smokingStatus}
             </Option>
           ))}
-        </Select>
+        </Select> */}
         {/* Lokasi Tinggal */}
-        <Select
+        {/* <Select
           color="green"
           value={residentType}
           onChange={(value) => setResidentType(value ?? "")}
@@ -155,7 +157,7 @@ export default function FeaturesForm() {
               {residentType}
             </Option>
           ))}
-        </Select>
+        </Select> */}
         {/* Ever Married */}
         <Select
           color="green"
