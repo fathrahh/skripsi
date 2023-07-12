@@ -1,5 +1,10 @@
 ### This Repository for skripsi Purpose
 
+## Dataset
+
+Dataset was retrieved from [Kaggle](https://www.kaggle.com/datasets/fedesoriano/stroke-prediction-dataset).
+In this repository the files name is [healthcare-dataset-stroke.csv](./healthcare-dataset-stroke-data.csv).
+
 - main.ipynb was core analytics
 - test_k_best.ipynb just for support find k of KNN
 - test.ipynb just for personal exploration. So this file can ignored
